@@ -38,15 +38,21 @@ vx = Freq_points(tx)
 
 # T means the Fourier Transformed fucntion
 # Create Signal f                                                                                                                 
+zero_out = np.zeros(tx.shape)
+zero_out[1000:2000] = 1
+
 f  = np.sin(2*np.pi*tx)   
+f *= zero_out
 Tf = Transform(f, 0)                                             
                                                              
 # Create Signal g
 g  = np.cos(2*np.pi*tx)
+g *= zero_out
 Tg= Transform(g, 0)
 
 # Convolution of f o g & 
-ConV = np.convolve(f, g,'full')
+#ConV = np.convolve(f, g,'full')
+ConV = np.convolve(f, g,'same')
 
 # Multiplying Transforms of f & g 
 ConVT = Transform( Tf * Tg, 1 )
@@ -54,7 +60,7 @@ ConVT = Transform( Tf * Tg, 1 )
 # Show that ConVT == T_ConV
 
 plt.figure(5)
-plt.plot(ConV, 'k', ConVT, 'g' )
+plt.plot(ConV, 'k', np.fft.fftshift(ConVT), 'g' )
 
 # Remove Multi-Line comment to show graphs of Time & Freq of f & g
 """
