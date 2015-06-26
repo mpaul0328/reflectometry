@@ -2,10 +2,13 @@ from scipy import signal
 import matplotlib.pyplot as plt
 import numpy as np
 
-# ffftfreq => gave corresponding freq from tx   
+# fftfreq => gave corresponding freq from tx   
 # fft => fourier transformation                                                                      
 # abs => converted imaginary # to real # 
 # fftshift => set zero at center
+
+# Number of test points
+N  = 5000        
 
 # Fourier Transform of Signal
 # Select 1 for Inverse FFFT
@@ -20,27 +23,27 @@ def Transform(signal, inverse):
 # Converts FFT for Graphing 
 def FFT_Graph(FFT):
     FFTG = np.fft.fftshift(abs(FFT))
-    FFTG = FFTG[1500:]
+    FFTG = FFTG[N/2:]
     return FFTG
 
 # Creates Freq points for Freq Domain
 def Freq_points(tx):
     a = np.fft.fftshift(np.fft.fftfreq(tx.size, tx[1] - tx[0]))
-    a = a[1500:]
+    a = a[N/2:]
     return a
 
-# Number of test points
-N  = 3001         
-                                                       
+
+# Fourier Transforms (FFT)                                         
 # X points for functions (tx => Time Domain; vx => Freq Domain)
 tx = np.linspace(0, 2*np.pi, N)
 vx = Freq_points(tx)
 
+# First & Last 50 points (zeros)
+zero_out = np.zeros(N)
+zero_out[N/4 : (3*N)/4] = 1
+
 # T means the Fourier Transformed fucntion
 # Create Signal f                                                                                                                 
-zero_out = np.zeros(tx.shape)
-zero_out[1000:2000] = 1
-
 f  = np.sin(2*np.pi*tx)   
 f *= zero_out
 Tf = Transform(f, 0)                                             
@@ -50,17 +53,35 @@ g  = np.cos(2*np.pi*tx)
 g *= zero_out
 Tg= Transform(g, 0)
 
-# Convolution of f o g & 
-#ConV = np.convolve(f, g,'full')
-ConV = np.convolve(f, g,'same')
 
-# Multiplying Transforms of f & g 
-ConVT = Transform( Tf * Tg, 1 )
+# Convolution THM [f o g] & FFTs
+# Proof: T{f o g} = Tf * Tg
+# {f o g}
+ConV = np.convolve(f, g,'same') 
 
-# Show that ConVT == T_ConV
+# T{f o g}
+TConV = Transform(ConV, 0)
 
+# Tf * Tg
+MT = Tf * Tg
+
+# Remove Multi-Line comment to show Proof of Equivalence
+"""
+MTG = FFT_Graph(MT)
+TConVG = FFT_Graph(TConV)
 plt.figure(5)
-plt.plot(ConV, 'k', np.fft.fftshift(ConVT), 'g' )
+plt.plot(vx, MTG, 'r', vx, TConVG, 'y')
+"""
+
+# Proof: {f o g} = T^-1{Tf * Tg}
+# T^-1{Tf * Tg}
+ITMT = Transform(MT, 1)
+
+# Remove Multi-Line comment to show Proof of Equivalence
+"""
+plt.figure(6)
+plt.plot(tx, ConV, 'r', tx, np.fft.fftshift(ITMT), 'b' )
+"""
 
 # Remove Multi-Line comment to show graphs of Time & Freq of f & g
 """
@@ -87,22 +108,5 @@ plt.plot(tx,g,'b')
 plt.title('Time Domain of G')
 plt.xlabel('Time')
 """
-plt. grid()
+plt.grid()
 plt.show()
-
-
-
-
-# Square Pulse 
-"""
-x = np.linspace(0.11,0.39,N)  
-y = signal.square(2* np.pi*5*x)
-
-
-plt.ylim(-2,2)
-plt.plot(x,y,'b')
-plt.title("Square Wave Pulse")
-
-plt. grid()
-plt.show()
-"""
