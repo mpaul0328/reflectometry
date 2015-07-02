@@ -1,40 +1,53 @@
-from scipy import signal
 import matplotlib.pyplot as plt
 import numpy as np
-from sympy import functions
 
-def Delta(x):
-    return functions.special.delta_functions.DiracDelta(x) 
+# Number of test points
+N  = 50        
 
-# Number of Test Points
-N = 5
+# Fourier Transform of Signal
+# Select 1 for Inverse FFT
+def Transform(signal, inverse):
+    if inverse == 1:
+        IFFT = np.fft.ifft(signal)
+        return IFFT
+    else:
+        FFT = np.fft.fft(signal)
+        return FFT
 
-x = [2,3,4,5,6,7,8]
+# Converts FFT for Graphing 
+def FFT_Graph(FFT):
+    FFTG = np.fft.fftshift(abs(FFT))
+    FFTG = FFTG[N/2:]
+    return FFTG
 
+# Creates Freq points for Freq Domain
+def Freq_points(tx):
+    a = np.fft.fftshift(np.fft.fftfreq(tx.size, tx[1] - tx[0]))
+    a = a[N/2:]
+    return a
 
-plt.figure(4)
-plt.plot(Delta(x))
-plt.grid()
-plt.show()
+# Pulse Generator(Pulse @ bin 20)
+tx = np.linspace(0,30*np.pi, N)
+vx = Freq_points(tx)
 
-"""
 y = np.zeros(N)
-i = N/2
-y[i-3:i+2] = 0.15, 0.3, 0.5, 0.3, 0.15
+y[20] = 1
 
-yf = np.fft.fft(y)
-xf = np.fft.fftfreq(x.size, x[1] - x[0])
+# FFT of Pulse -> Constant line across all vx
+Ty = Transform(y, 0)
+
+
+TyG = FFT_Graph(Ty)
 
 plt.figure(1)
-plt.plot(np.fft.fftshift(abs(xf)), np.fft.fftshift(np.abs(yf)),'g')
+plt.plot(vx, TyG,'g')
 plt.xlabel('Frequency')
 plt.title('Frequency Domain')
 
 plt.figure(2)
-plt.plot(x,y,'b')
+plt.plot(tx,y,'b')
 plt.xlabel('Time')
 plt.title("Time Domain")
 
 plt.grid()
 plt.show()
-"""
