@@ -22,15 +22,17 @@ def Transform(signal, inverse):
         return FFT
 
 # Converts FFT for Graphing 
+# Only Use 1 for 
 def FFT_Graph(FFT):
     FFTG = np.fft.fftshift(abs(FFT))
-    FFTG = FFTG[N/2:]
+   # if x == 1:
+      #  FFTG = FFTG[N/2:]
     return FFTG
 
 # Creates Freq points for Freq Domain
 def Freq_points(tx):
     a = np.fft.fftshift(np.fft.fftfreq(tx.size, tx[1] - tx[0]))
-    a = a[N/2:]
+    #a = a[N/2:]
     return a
 
 
@@ -63,28 +65,46 @@ out = Tp * Ts
 # Take out and Inverse Transform it to produce the convolution of p o s
 # ITout is in time domain
 ITout = Transform(out, 1)
+Slice = ITout[20:]  
+Part = ITout[:20]
 
+# New output in time domain w/ pulse moved
+Output = np.zeros(N)
+Output[:30] = Slice
+Output[30:] = Part
+
+Sys_Int = Transform(Output, 0)
 
 
 # All Graphs in order of action (Each Graph has Description)
 
-plt.figure(4)
+plt.figure(6)
 plt.plot(p, 'r')
 plt.title('Pulse in Time Doamin Before Test')
 
 TpG = FFT_Graph(Tp)
-plt.figure(3)
+plt.figure(5)
 plt.plot(vx,TpG, 'r')
 plt.title('Pulse in Frequency Domain Before Test')
 
 outG = FFT_Graph(out)
-plt.figure(2)
+plt.figure(4)
 plt.plot(vx, outG, 'b')
 plt.title("Pulse multiplied w/ System in Frequency Domain (Output)")
 
-plt.figure(1)
+plt.figure(3)
 plt.plot(ITout, 'g')
 plt.title('Inverse Transform of output which gives Convolution of Pulse & System')
+
+plt.figure(2)
+plt.plot(Output, 'y')
+
+Sys_IntG = FFT_Graph(Sys_Int)
+plt.figure(1)
+plt.plot(Sys_IntG, 'm')
+
+plt.figure(1)
+plt.plot(Tri(1), 'k')
 
 plt.grid()
 plt.show()
