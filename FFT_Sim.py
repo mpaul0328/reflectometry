@@ -7,7 +7,7 @@ N = 5000
 # Points taken between interval on x- axis
 x = np.linspace(0.0, 2*np.pi, N)
 # Signal(y-function)
-y = np.cos(2*np.pi*80*x) #+ np.sin(2*np.pi*50*x)
+y = np.cos(2*np.pi*80*x) + np.sin(2*np.pi*50*x)
 
 # Fourier Transformation of signal
 yf = np.fft.fft(y)
