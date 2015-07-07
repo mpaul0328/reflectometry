@@ -1,6 +1,6 @@
-from scipy import signal
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy import signal
 
 # fftfreq => gave corresponding freq from tx   
 # fft => fourier transformation                                                                      
@@ -11,7 +11,7 @@ import numpy as np
 N  = 5000        
 
 # Fourier Transform of Signal
-# Select 1 for Inverse FFFT
+# Select 1 for Inverse FFT
 def Transform(signal, inverse):
     if inverse == 1:
         IFFT = np.fft.ifft(signal)
@@ -35,6 +35,7 @@ def Freq_points(tx):
 
 # Fourier Transforms (FFT)                                         
 # X points for functions (tx => Time Domain; vx => Freq Domain)
+# vx used only for graphing
 tx = np.linspace(0, 2*np.pi, N)
 vx = Freq_points(tx)
 
@@ -44,12 +45,12 @@ zero_out[N/4 : (3*N)/4] = 1
 
 # T means the Fourier Transformed fucntion
 # Create Signal f                                                                                                                 
-f  = np.sin(2*np.pi*tx)   
+f  = np.sin(2*np.pi*50*tx)   
 f *= zero_out
 Tf = Transform(f, 0)                                             
                                                              
 # Create Signal g
-g  = np.cos(2*np.pi*tx)
+g  = np.cos(2*np.pi*80*tx)
 g *= zero_out
 Tg= Transform(g, 0)
 
@@ -66,25 +67,31 @@ TConV = Transform(ConV, 0)
 MT = Tf * Tg
 
 # Remove Multi-Line comment to show Proof of Equivalence
-"""
+
 MTG = FFT_Graph(MT)
 TConVG = FFT_Graph(TConV)
 plt.figure(5)
+plt.title("T{f o g} = Tf * Tg")
 plt.plot(vx, MTG, 'r', vx, TConVG, 'y')
-"""
+
 
 # Proof: {f o g} = T^-1{Tf * Tg}
 # T^-1{Tf * Tg}
 ITMT = Transform(MT, 1)
 
+# Undoing the Convolution {f o g} (Known: f)
+# Proof: DeConv(f o g, f)
+ #g_ , r= signal.deconvolve(ConV, f)[0]
+
 # Remove Multi-Line comment to show Proof of Equivalence
-"""
+
 plt.figure(6)
+plt.title("{f o g} = T^-1{Tf * Tg}")
 plt.plot(tx, ConV, 'r', tx, np.fft.fftshift(ITMT), 'b' )
-"""
+
 
 # Remove Multi-Line comment to show graphs of Time & Freq of f & g
-"""
+
 TgG = FFT_Graph(Tg)
 TfG = FFT_Graph(Tf)  
 
@@ -107,6 +114,6 @@ plt.figure(4)
 plt.plot(tx,g,'b')
 plt.title('Time Domain of G')
 plt.xlabel('Time')
-"""
+
 plt.grid()
 plt.show()
