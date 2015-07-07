@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy import signal
 
 # Number of test points
 N  = 50  
@@ -44,7 +45,7 @@ vx = Freq_points(tx)
 """
 # Pulse Generator(Pulse @ bin 0)
 p = np.zeros(N)
-p[20] = 1
+p[0] = 1
 
 # FFT of Pulse -> Constant line across all vx
 Tp = Transform(p, 0)
@@ -59,22 +60,16 @@ Ts = Tri(1)
 # Convolution THM T{p o s} = Tp * Ts
 out = Tp * Ts
 
+
 """
 ------------------ANALYSIS------------------
 """
 # Take out and Inverse Transform it to produce the convolution of p o s
 # ITout is in time domain
 ITout = Transform(out, 1)
-Slice = ITout[20:]  
-Part = ITout[:20]
 
-# New output in time domain w/ pulse moved
-Output = np.zeros(N)
-Output[:30] = Slice
-Output[30:] = Part
-
-Sys_Int = Transform(Output, 0)
-
+Sys_Int = signal.deconvolve(ITout, p)
+TSys = Transform(Sys_Int, 0)
 
 # All Graphs in order of action (Each Graph has Description)
 
@@ -96,15 +91,11 @@ plt.figure(3)
 plt.plot(ITout, 'g')
 plt.title('Inverse Transform of output which gives Convolution of Pulse & System')
 
-plt.figure(2)
-plt.plot(Output, 'y')
-
-Sys_IntG = FFT_Graph(Sys_Int)
 plt.figure(1)
-plt.plot(Sys_IntG, 'm')
+plt.plot(vx, TSys, 'm')
 
 plt.figure(1)
-plt.plot(Tri(1), 'k')
+plt.plot(vx, Tri(1), 'k')
 
 plt.grid()
 plt.show()
