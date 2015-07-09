@@ -1,119 +1,50 @@
-import matplotlib.pyplot as plt
-import numpy as np
-from scipy import signal
-
-# fftfreq => gave corresponding freq from tx   
-# fft => fourier transformation                                                                      
-# abs => converted imaginary # to real # 
-# fftshift => set zero at center
-
-# Number of test points
-N  = 5000        
-
-# Fourier Transform of Signal
-# Select 1 for Inverse FFT
-def Transform(signal, inverse):
-    if inverse == 1:
-        IFFT = np.fft.ifft(signal)
-        return IFFT
-    else:
-        FFT = np.fft.fft(signal)
-        return FFT
-
-# Converts FFT for Graphing 
-def FFT_Graph(FFT):
-    FFTG = np.fft.fftshift(abs(FFT))
-    FFTG = FFTG[N/2:]
-    return FFTG
-
-# Creates Freq points for Freq Domain
-def Freq_points(tx):
-    a = np.fft.fftshift(np.fft.fftfreq(tx.size, tx[1] - tx[0]))
-    a = a[N/2:]
-    return a
-
-
-# Fourier Transforms (FFT)                                         
-# X points for functions (tx => Time Domain; vx => Freq Domain)
-# vx used only for graphing
-tx = np.linspace(0, 2*np.pi, N)
-vx = Freq_points(tx)
-
-# First & Last 50 points (zeros)
+import matplotlib.pyplot as plt, numpy as np
+                                                                   
+N  = 5000 # Number of test points   
+t = np.linspace(0, 2*np.pi, N) # x- axis in time domain
+v = np.fft.fftshift(np.fft.fftfreq(t.size, t[1] - t[0])) # x-axis in frequency domain
 zero_out = np.zeros(N)
-zero_out[N/4 : (3*N)/4] = 1
+zero_out[N/4 : (3*N)/4] = 1 # First & Last quarter points (zeros)                                                                                                     
+f  = np.sin(2*np.pi*50*t)   
+f *= zero_out # Create Signal f w/ ends (zeros)   
+vf = np.fft.fft(f) # Signal f in frequecy domain                                     
+g  = np.cos(2*np.pi*80*t)
+g *= zero_out # Create Signal g w/ ends (zeros) 
+vg= np.fft.fft(g) # Signal g in frequecy domain    
 
-# T means the Fourier Transformed fucntion
-# Create Signal f                                                                                                                 
-f  = np.sin(2*np.pi*50*tx)   
-f *= zero_out
-Tf = Transform(f, 0)                                             
-                                                             
-# Create Signal g
-g  = np.cos(2*np.pi*80*tx)
-g *= zero_out
-Tg= Transform(g, 0)
-
-
-# Convolution THM [f o g] & FFTs
-# Proof: T{f o g} = Tf * Tg
-# {f o g}
-ConV = np.convolve(f, g,'same') 
-
-# T{f o g}
-TConV = Transform(ConV, 0)
-
-# Tf * Tg
-MT = Tf * Tg
+# Convolution THM 
+conv = np.convolve(f, g,'same') # {f o g}
+vfg = vf * vg 
+fg = np.fft.ifft(vfg) # v^-1{vf * vg} 
+vconv = np.fft.fft(conv) # v{f o g}
 
 # Remove Multi-Line comment to show Proof of Equivalence
-
-MTG = FFT_Graph(MT)
-TConVG = FFT_Graph(TConV)
+"""
 plt.figure(5)
-plt.title("T{f o g} = Tf * Tg")
-plt.plot(vx, MTG, 'r', vx, TConVG, 'y')
-
-
-# Proof: {f o g} = T^-1{Tf * Tg}
-# T^-1{Tf * Tg}
-ITMT = Transform(MT, 1)
-
-# Undoing the Convolution {f o g} (Known: f)
-# Proof: DeConv(f o g, f)
- #g_ , r= signal.deconvolve(ConV, f)[0]
-
-# Remove Multi-Line comment to show Proof of Equivalence
+plt.title("Proof: v{f o g} = vf * vg")
+plt.plot(v, np.fft.fftshift(np.abs(vfg)), 'r', v, np.fft.fftshift(np.abs(vconv)), 'y')
 
 plt.figure(6)
-plt.title("{f o g} = T^-1{Tf * Tg}")
-plt.plot(tx, ConV, 'r', tx, np.fft.fftshift(ITMT), 'b' )
-
-
+plt.title("Proof: {f o g} = v^-1{vf * vg}")
+plt.plot(t, conv, 'r', t, np.fft.fftshift(fg), 'b' )     
+"""
 # Remove Multi-Line comment to show graphs of Time & Freq of f & g
-
-TgG = FFT_Graph(Tg)
-TfG = FFT_Graph(Tf)  
-
+"""
 plt.figure(1)
-plt.plot(vx, TfG,'k')
+plt.plot(v, np.fft.fftshift(np.abs(vf)),'k')
 plt.title('Frequency Domain of F')
-plt.xlabel('Frequency')
 
 plt.figure(2)
-plt.plot(tx,f,'k')
+plt.plot(t,f,'k')
 plt.title('Time Domain of F')
-plt.xlabel('Time')
 
 plt.figure(3)
-plt.plot(vx, TgG,'b')
+plt.plot(v, np.fft.fftshift(np.abs(vg)),'b')
 plt.title('Frequency Domain of G')
-plt.xlabel('Frequency')
 
 plt.figure(4)
-plt.plot(tx,g,'b')
+plt.plot(t,g,'b')
 plt.title('Time Domain of G')
-plt.xlabel('Time')
+"""
+plt.show()      
 
-plt.grid()
-plt.show()
